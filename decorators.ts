@@ -28,7 +28,8 @@ function LoggerMethod(
 
 // Parameter decorators
 function LoggerParam(target: any, name: string | Symbol, position: number) {
-  console.log(target, name, position);
+  // console.log(target, name, position);
+  return;
 }
 
 // decorator factories
@@ -73,7 +74,7 @@ function Logger1Custom(LoggerString: string) {
 }
 
 @Logger1Custom("a new class has been instantiated!")
-@Logger1("hazel is a person")
+// @Logger1("hazel is a person")
 class Person {
   // @LoggerProp // here, the "target" parameter points to the Person prototype
   name: string = "hazel";
@@ -127,6 +128,86 @@ class Printer {
 
 const printer = new Printer("it works!");
 
-const buttonEl = document.querySelector("button")! as HTMLButtonElement;
+const buttonEl = document.querySelector("button");
 
-buttonEl.addEventListener("click", printer.printWork);
+if (!!buttonEl) {
+  (buttonEl as HTMLButtonElement).addEventListener("click", printer.printWork);
+}
+
+//EXERCISE
+//AIM: validate html form inputs with property decorators
+interface ValidatorConfig {
+  [objPropName: string]: {
+    [propName: string]: string[];
+  };
+}
+
+const registeredValidators: ValidatorConfig = {};
+
+function Required(target: any, propertyName: string) {
+  registeredValidators[target.constructor.name] = {
+    ...registeredValidators[target.constructor.name],
+    [propertyName]: ["required"],
+  };
+}
+
+function shouldBePositive(target: any, propertyName: string) {
+  registeredValidators[target.constructor.name] = {
+    ...registeredValidators[target.constructor.name],
+    [propertyName]: ["positive"],
+  };
+  console.log(registeredValidators);
+}
+
+function validate(obj: any): boolean {
+  const validatedObjConfig = registeredValidators[obj.constructor.name];
+  if (!validatedObjConfig) return true;
+  let isValidated: boolean = true;
+  for (const validateProp in validatedObjConfig) {
+    for (const validateValue of validatedObjConfig[validateProp]) {
+      switch (validateValue) {
+        case "positive":
+          isValidated = obj[validateProp] > 0 && isValidated;
+          break;
+        case "required":
+          console.log(obj[validateProp]);
+          isValidated = !!obj[validateProp] && isValidated;
+          break;
+        default:
+          console.error("validator not correctly set up!");
+          return true;
+      }
+    }
+  }
+  console.log(isValidated);
+  return isValidated;
+}
+
+class Course {
+  @shouldBePositive
+  price: number;
+  @Required
+  title: string;
+  constructor(p: string, t: string) {
+    this.price = +p;
+    this.title = t;
+  }
+}
+
+const coursePriceEl = document.querySelector("input[type='number']");
+const courseTitleEl = document.querySelector("input[type='text']");
+const courseFormEl = document.querySelector("form");
+
+if (!!coursePriceEl && !!courseTitleEl && !!courseFormEl) {
+  (courseFormEl as HTMLFormElement).addEventListener("submit", (e) => {
+    e.preventDefault();
+    const coursePrice = (coursePriceEl as HTMLInputElement).value;
+    const courseTitle = (courseTitleEl as HTMLInputElement).value;
+    const newCourse = new Course(coursePrice, courseTitle);
+    if (validate(newCourse)) {
+      console.log(newCourse);
+    } else {
+      confirm("course form fields are incorrect!");
+    }
+  });
+}
