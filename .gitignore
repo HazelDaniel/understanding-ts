@@ -3,3 +3,6 @@ node_modules
 package-lock.json
 tsconfig.json
 **/**.js.map
+
+**/**using-ts.ts
+using-ts

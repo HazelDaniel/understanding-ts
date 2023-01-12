@@ -1,3 +1,6 @@
+/*
+
+
 // bare class decorators
 function Logger(constructor: any) {
   console.log(constructor, "constructor created");
@@ -103,7 +106,7 @@ class Person {
 // EXERCISE1
 // AIM: CREATE AN AUTOBIND PROPERTY DECORATOR THAT AUTOMATICALLY BINDS THE THIS WHEN IN A CALLBACK
 
-function Autobind(
+function AutoBind(
   _: any,
   _1: string,
   descriptor: PropertyDescriptor
@@ -120,7 +123,7 @@ function Autobind(
 
 class Printer {
   constructor(public work: string) {}
-  @Autobind
+  @AutoBind
   printWork(this: Printer) {
     console.log(this.work);
   }
@@ -211,3 +214,4 @@ if (!!coursePriceEl && !!courseTitleEl && !!courseFormEl) {
     }
   });
 }
+ */
