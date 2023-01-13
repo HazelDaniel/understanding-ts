@@ -225,7 +225,7 @@ class ProjectItem
   }
 
   renderContent() {
-    console.log(this.element,this.hostElement);
+    console.log(this.element, this.hostElement);
     const h2Element = document.createElement("h2");
     const h3Element = document.createElement("h3");
     const PElement = document.createElement("p");
@@ -312,15 +312,21 @@ class ProjectList
   }
 }
 
+
+
+
 interface ValidatableProjectInput {
   [prop: string]: {
-    [prop: string]: Array<string | object>;
+    [prop: string]: {
+      element: HTMLInputElement | HTMLTextAreaElement;
+      rules: Array<any & {max: number, min: number}>;
+    };
   };
 }
 
 let registeredInputValidator: ValidatableProjectInput = {};
 
-function validateProjectInput(
+function ValidateProjectInput(
   hasRange?: "hasrange",
   max?: number,
   min?: number
@@ -332,6 +338,14 @@ function validateProjectInput(
         console.log("constructor of the child input");
         super();
       }
+      static configure() {
+        TargetChildClass.element.addEventListener("submit", TargetChildClass.submitHandler.bind(this));
+      }
+      private static submitHandler(event: Event) {
+        event.preventDefault();
+        console.log("submitted");
+      }
+
       static getInstance() {
         // console.log("getting instance of the project input child");
         if (!!this.instance) {
@@ -341,7 +355,7 @@ function validateProjectInput(
       }
     }
     const targetChildSingleton = TargetChildClass.getInstance();
-    // TODO: USE THE FOLLOWING ELEMENTS FOR VALIDATION. 
+
     const titleInputElement = targetChildSingleton.element.querySelector(
       "#title"
     )! as HTMLInputElement;
@@ -353,33 +367,29 @@ function validateProjectInput(
     )! as HTMLInputElement;
 
     function convertToObject<T extends string[]>(a: T) {
-      const ArrayToObj = a.reduce((acc:any, curr)=>{
+      const ArrayToObj = a.reduce((acc: any, curr) => {
         acc[curr] = curr;
         return acc;
-      },{});
+      }, {});
       return ArrayToObj;
-       
     }
-    
-    const elementProp:{[a: string]: string} = convertToObject<string[]>(Object.keys(target));
-    const validatorFields: () => Array<string | object> = () => {
-      const field: Array<string | object> = [];
 
+    const elementProp: { [a: string]: string } = convertToObject<string[]>(
+      Object.keys(target)
+    );
+    const validatorFields: () => Array<string | {max:number, min: number}> = () => {
+      const field: Array<string | {max: number, min: number}> = [];
       field.push("required");
       if (!!hasRange && max && min) {
-        
         if (elementProp[propName] === "peopleInputElement") {
           field.push("rangeint");
           field.push("positive");
-          // NOTE: THIS IS WHERE WE APPEND THE MIN AND MAX OBJECT
         } else if (
           elementProp[propName] === "descriptionInputElement" ||
           elementProp[propName] === "titleInputElement"
         ) {
           field.push("rangestring");
           field.push("longenough");
-
-          // NOTE: THIS IS WHERE WE APPEND THE MIN AND MAX OBJECT
         }
         field.push({
           max,
@@ -395,29 +405,89 @@ function validateProjectInput(
       }
       return field;
     };
+
+    function getElementFromProp(prop: string): HTMLInputElement | HTMLTextAreaElement{
+      switch (prop.toLowerCase()){
+        case "titleinputelement":
+          return titleInputElement;
+          case "descriptioninputelement":
+          return descriptionInputElement;
+          case "peopleinputelement":
+            return peopleInputElement;
+            default: throw new Error(`invalid input property : ${prop}`);
+      }
+    }
+
     registeredInputValidator[target.name] = {
       ...registeredInputValidator[target.name],
-      [propName]: validatorFields(),
+      [propName]: {
+        element: getElementFromProp(elementProp[propName]),
+        rules: validatorFields(),
+      },
     };
-    console.log(registeredInputValidator);
+    if (elementProp[propName].toLowerCase() === "titleinputelement") {
+
+      (targetChildSingleton.element as HTMLFormElement)!.addEventListener(
+        "submit",
+        (e: Event) => {
+          e.preventDefault();
+          console.log(target.name);
+          if (!validateEntriesFromForm( target.name,registeredInputValidator)){
+            confirm("one of the input fields is incorrectly provided")
+          }else{
+            projectState.addProject(titleInputElement.value, descriptionInputElement.value,+peopleInputElement.value)
+          }
+
+        }
+      );
+    }
   };
 }
+function validateEntriesFromForm( key:string, validatable:ValidatableProjectInput, responseData: object = {}):boolean{
+  let isValid: boolean = true;
+  for (const prop of Object.keys(validatable[key])){
+    const {element,rules} = validatable[key][prop];
+    const input = element.value;
+    console.log(input)
+    console.log(element,rules);
+    const minMax:{min:number,  max: number} = rules[rules.length -1];
+    if(rules.includes('required')){
+      if(rules.includes('rangeint')){
+        isValid = isValid && input != null && +input >= minMax.min && +input <= minMax.max;
+      }
+      else if(rules.includes('rangestring')){
+        isValid = isValid && !!input && input.length <= minMax.max && input.length >= minMax.min;
+      }
+       if (rules.includes('positive')){
+        isValid = isValid && +input > -1;
+      }else if (rules.includes('longenough')){
+        isValid = isValid && input.length >= 10;
+      }
+    }else{
+      return isValid;
+    }
 
+  }
+  return isValid;
+
+}
 
 // ProjectInput Class
 class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
-  @validateProjectInput("hasrange", 40, 10)
+  @ValidateProjectInput("hasrange", 40, 10)
   static titleInputElement: HTMLInputElement;
-  @validateProjectInput()
+  @ValidateProjectInput()
   static descriptionInputElement: HTMLInputElement;
-  @validateProjectInput("hasrange", 40, 5)
+  @ValidateProjectInput("hasrange", 40, 5)
   static peopleInputElement: HTMLInputElement;
+  static element: HTMLElement;
 
   private static instance: ProjectInput = new ProjectInput();
 
   private constructor() {
     // console.log("constructor of the project input");
     super("project-input", "app", true, "user-input");
+    ProjectInput.element = this.element;
     ProjectInput.titleInputElement = this.element.querySelector(
       "#title"
     ) as HTMLInputElement;
@@ -431,71 +501,18 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
   }
 
   configure() {
-    this.element.addEventListener("submit", this.submitHandler);
   }
 
   renderContent() {}
 
-  private static gatherUserInput(): [string, string, number] | void {
-    const enteredTitle = ProjectInput.titleInputElement.value;
-    const enteredDescription = ProjectInput.descriptionInputElement.value;
-    const enteredPeople = ProjectInput.peopleInputElement.value;
-
-    const titleValidatable: Validatable = {
-      value: enteredTitle,
-      required: true,
-    };
-    const descriptionValidatable: Validatable = {
-      value: enteredDescription,
-      required: true,
-      minLength: 5,
-    };
-    const peopleValidatable: Validatable = {
-      value: +enteredPeople,
-      required: true,
-      min: 1,
-      max: 5,
-    };
-
-    if (
-      !validate(titleValidatable) ||
-      !validate(descriptionValidatable) ||
-      !validate(peopleValidatable)
-    ) {
-      alert("Invalid input, please try again!");
-      return;
-    } else {
-      return [enteredTitle, enteredDescription, +enteredPeople];
-    }
-  }
 
   static getInstance() {
-    // console.log("getting instance for project input");
-    // return this.instance;
     if (this.instance) {
       return this.instance;
     }
     return new ProjectInput();
   }
-
-  private static clearInputs() {
-    ProjectInput.titleInputElement.value = "";
-    ProjectInput.descriptionInputElement.value = "";
-    ProjectInput.peopleInputElement.value = "";
-  }
-
-  @autobind
-  private submitHandler(event: Event) {
-    event.preventDefault();
-    console.log("submitted");
-    console.log(ProjectInput.gatherUserInput);
-    const userInput = ProjectInput.gatherUserInput();
-    if (Array.isArray(userInput)) {
-      const [title, desc, people] = userInput;
-      projectState.addProject(title, desc, people);
-      ProjectInput.clearInputs();
-    }
-  }
+  
 }
 
 const prjInput = ProjectInput.getInstance(); //NOTE: this won't return a new instance of the project input since it's already called in one of the decorators
