@@ -313,8 +313,6 @@ class ProjectList
 }
 
 
-
-
 interface ValidatableProjectInput {
   [prop: string]: {
     [prop: string]: {
@@ -347,7 +345,6 @@ function ValidateProjectInput(
       }
 
       static getInstance() {
-        // console.log("getting instance of the project input child");
         if (!!this.instance) {
           return this.instance;
         }
@@ -431,11 +428,14 @@ function ValidateProjectInput(
         "submit",
         (e: Event) => {
           e.preventDefault();
-          console.log(target.name);
-          if (!validateEntriesFromForm( target.name,registeredInputValidator)){
-            confirm("one of the input fields is incorrectly provided")
+          const isEntriesValid = validateEntriesFromForm(target.name, registeredInputValidator);
+          if (!isEntriesValid.isValid){
+              isEntriesValid.errorData.forEach(error=>{
+                confirm(error);
+              })
           }else{
-            projectState.addProject(titleInputElement.value, descriptionInputElement.value,+peopleInputElement.value)
+            projectState.addProject(titleInputElement.value, descriptionInputElement.value,+peopleInputElement.value);
+            isEntriesValid.elements.forEach(el=>el.value = "");
           }
 
         }
@@ -443,34 +443,56 @@ function ValidateProjectInput(
     }
   };
 }
-function validateEntriesFromForm( key:string, validatable:ValidatableProjectInput, responseData: object = {}):boolean{
+function validateEntriesFromForm( key:string, validatable:ValidatableProjectInput, errorData: Array<string> = []):{isValid: boolean,errorData:Array<string>,elements:Array<HTMLInputElement | HTMLTextAreaElement>}{
   let isValid: boolean = true;
+  const elementsArr:Array<HTMLInputElement | HTMLTextAreaElement> = [];
   for (const prop of Object.keys(validatable[key])){
     const {element,rules} = validatable[key][prop];
+    elementsArr.push(element);
     const input = element.value;
-    console.log(input)
-    console.log(element,rules);
+
     const minMax:{min:number,  max: number} = rules[rules.length -1];
     if(rules.includes('required')){
       if(rules.includes('rangeint')){
         isValid = isValid && input != null && +input >= minMax.min && +input <= minMax.max;
+        if(!(input != null && +input >= minMax.min && +input <= minMax.max)){
+          errorData.push(`${element.id} field's value is not between ${minMax.min} and ${minMax.max}`);
+        }
       }
       else if(rules.includes('rangestring')){
         isValid = isValid && !!input && input.length <= minMax.max && input.length >= minMax.min;
+        if(!(!!input && input.length <= minMax.max && input.length >= minMax.min)){
+          errorData.push(`${element.id} field's length is not between ${minMax.min} and ${minMax.max}`);
+        }
       }
        if (rules.includes('positive')){
         isValid = isValid && +input > -1;
+        if(!(+input > -1)){
+          errorData.push(`${element.id} field's value is not a positive number`);
+        }
       }else if (rules.includes('longenough')){
         isValid = isValid && input.length >= 10;
+        if(!(input.length >= 10)){
+          errorData.push(`${element.id} field's value is not long enough`);
+        }
       }
     }else{
-      return isValid;
+      return{
+        isValid:false,
+        errorData: ["invalid format"],
+        elements:elementsArr
+      }
     }
 
   }
-  return isValid;
+  return {
+    isValid,
+    errorData,
+    elements:elementsArr
+  };
 
 }
+
 
 // ProjectInput Class
 class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
@@ -485,7 +507,6 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
   private static instance: ProjectInput = new ProjectInput();
 
   private constructor() {
-    // console.log("constructor of the project input");
     super("project-input", "app", true, "user-input");
     ProjectInput.element = this.element;
     ProjectInput.titleInputElement = this.element.querySelector(
@@ -507,10 +528,7 @@ class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
 
 
   static getInstance() {
-    if (this.instance) {
-      return this.instance;
-    }
-    return new ProjectInput();
+    return this.instance;
   }
   
 }
