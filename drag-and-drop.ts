@@ -75,7 +75,7 @@ class ProjectState extends State<Project> {
   moveProject(projectId: string, newStatus: ProjectStatus) {
     const project = this.projects.find((prj) => prj.id === projectId);
     if (project && project.status !== newStatus) {
-      project.status = newStatus;
+        project.status = newStatus;
       this.updateListeners();
     }
   }
@@ -89,49 +89,6 @@ class ProjectState extends State<Project> {
 
 const projectState = ProjectState.getInstance();
 
-// Validation
-interface Validatable {
-  value: string | number;
-  required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-  min?: number;
-  max?: number;
-}
-
-function validate(validatableInput: Validatable) {
-  let isValid = true;
-  if (validatableInput.required) {
-    isValid = isValid && validatableInput.value.toString().trim().length !== 0;
-  }
-  if (
-    validatableInput.minLength != null &&
-    typeof validatableInput.value === "string"
-  ) {
-    isValid =
-      isValid && validatableInput.value.length >= validatableInput.minLength;
-  }
-  if (
-    validatableInput.maxLength != null &&
-    typeof validatableInput.value === "string"
-  ) {
-    isValid =
-      isValid && validatableInput.value.length <= validatableInput.maxLength;
-  }
-  if (
-    validatableInput.min != null &&
-    typeof validatableInput.value === "number"
-  ) {
-    isValid = isValid && validatableInput.value >= validatableInput.min;
-  }
-  if (
-    validatableInput.max != null &&
-    typeof validatableInput.value === "number"
-  ) {
-    isValid = isValid && validatableInput.value <= validatableInput.max;
-  }
-  return isValid;
-}
 
 // autobind decorator
 function autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
@@ -204,6 +161,7 @@ class ProjectItem
   constructor(hostId: string, project: Project) {
     super("single-project", hostId, false, project.id);
     this.project = project;
+    this.element.setAttribute("draggable","true");
 
     this.configure();
     this.renderContent();
@@ -216,7 +174,7 @@ class ProjectItem
   }
 
   dragEndHandler(_: DragEvent) {
-    console.log("DragEnd");
+    console.log(projectState);
   }
 
   configure() {
@@ -225,7 +183,6 @@ class ProjectItem
   }
 
   renderContent() {
-    console.log(this.element, this.hostElement);
     const h2Element = document.createElement("h2");
     const h3Element = document.createElement("h3");
     const PElement = document.createElement("p");
@@ -312,7 +269,6 @@ class ProjectList
   }
 }
 
-
 interface ValidatableProjectInput {
   [prop: string]: {
     [prop: string]: {
@@ -322,7 +278,7 @@ interface ValidatableProjectInput {
   };
 }
 
-let registeredInputValidator: ValidatableProjectInput = {};
+const registeredInputValidator: ValidatableProjectInput = {};
 
 function ValidateProjectInput(
   hasRange?: "hasrange",
@@ -492,7 +448,6 @@ function validateEntriesFromForm( key:string, validatable:ValidatableProjectInpu
   };
 
 }
-
 
 // ProjectInput Class
 class ProjectInput extends Component<HTMLDivElement, HTMLFormElement> {
