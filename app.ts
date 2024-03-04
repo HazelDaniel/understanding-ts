@@ -1,4 +1,25 @@
-//TODO:  write an example of union type , literal type and type aliasing
-//TODO: practice classes and interfaces and touch on all concept learned.
+type Combinable = number | string
+type conversionDescriptor = 'as-number' | 'as-text'
+
+function combine(input1: Combinable, input2: Combinable, resultConversion: conversionDescriptor) {
+	let result;
+	if (typeof input1 === "number" && typeof input2 === "number" || resultConversion === "as-number") {
+		result = +input1 + +input2;
+	} else {
+		result = input1.toString() + input2.toString()
+	}
+	return result
+}
+
+const numbs: [number, number] = [4, 6]
+const strs: [string, string] = ["hello ", "typescript"]
+
+console.log(combine(strs[0], strs[1], "as-text"))
+console.log(combine(numbs[0], numbs[1], "as-number"))
 
 
+function add(n1: number, n2: number) {
+  return n1 + n2
+}
+
+console.log(add(1, 2));
