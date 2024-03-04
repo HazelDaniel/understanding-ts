@@ -23,3 +23,18 @@ function add(n1: number, n2: number) {
 }
 
 console.log(add(1, 2));
+function printAddResult(n1: number, n2: number): void {
+	console.log('result ' + (n1 + n2));
+}
+
+let userInput: unknown;
+let userName: string;
+
+userName = "my user name";
+// userName = userInput // this raises error can't assign unknown type to other types
+if (typeof userInput === 'string') {
+	userName = userInput;
+}
+console.log(userName)
+
+printAddResult(1, 14);
