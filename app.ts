@@ -1,30 +1,36 @@
-type Combinable = number | string
-type conversionDescriptor = 'as-number' | 'as-text'
+type Combinable = number | string;
+type conversionDescriptor = "as-number" | "as-text";
 
-function combine(input1: Combinable, input2: Combinable, resultConversion: conversionDescriptor) {
-	let result;
-	if (typeof input1 === "number" && typeof input2 === "number" || resultConversion === "as-number") {
-		result = +input1 + +input2;
-	} else {
-		result = input1.toString() + input2.toString()
-	}
-	return result
+function combine(
+  input1: Combinable,
+  input2: Combinable,
+  resultConversion: conversionDescriptor
+) {
+  let result;
+  if (
+    (typeof input1 === "number" && typeof input2 === "number") ||
+    resultConversion === "as-number"
+  ) {
+    result = +input1 + +input2;
+  } else {
+    result = input1.toString() + input2.toString();
+  }
+  return result;
 }
 
-const numbs: [number, number] = [4, 6]
-const strs: [string, string] = ["hello ", "typescript"]
+const numbs: [number, number] = [4, 6];
+const strs: [string, string] = ["hello ", "typescript"];
 
-console.log(combine(strs[0], strs[1], "as-text"))
-console.log(combine(numbs[0], numbs[1], "as-number"))
-
+console.log(combine(strs[0], strs[1], "as-text"));
+console.log(combine(numbs[0], numbs[1], "as-number"));
 
 function add(n1: number, n2: number) {
-  return n1 + n2
+  return n1 + n2;
 }
 
 console.log(add(1, 2));
 function printAddResult(n1: number, n2: number): void {
-	console.log('result ' + (n1 + n2));
+  console.log("result " + (n1 + n2));
 }
 
 let userInput: unknown;
@@ -32,9 +38,65 @@ let userName: string;
 
 userName = "my user name";
 // userName = userInput // this raises error can't assign unknown type to other types
-if (typeof userInput === 'string') {
-	userName = userInput;
+if (typeof userInput === "string") {
+  userName = userInput;
 }
-console.log(userName)
+console.log(userName);
 
 printAddResult(1, 14);
+
+// inheritance
+class Department {
+  protected employees: string[] = [];
+  constructor(private readonly id: string, public name: string) {}
+
+  describe(this: Department) {
+    console.log(`Department (${this.id}): ${this.name}`);
+  }
+
+  addEmployee(employee: string) {
+    this.employees.push(employee);
+  }
+
+  printEmployeeInformation() {
+    console.log(this.employees.length);
+    console.log(this.employees);
+  }
+}
+
+// const accounting = new Department('d1', 'accounting');
+
+// accounting.addEmployee("Daniel");
+// accounting.addEmployee("Emmanuel");
+
+class ITDepartment extends Department {
+  constructor(id: string, public admins: string[]) {
+    super(id, "IT");
+  }
+}
+
+class AccountingDepartment extends Department {
+  constructor(id: string, private reports: string[]) {
+    super(id, "Accounting");
+  }
+
+	addEmployee(name: string) {
+		if (name === "Daniel") {
+			return;
+		}
+		this.employees.push(name);
+	}
+
+  addReport(text: string) {
+    this.reports.push(text);
+  }
+
+  printReports() {
+    console.log(this.reports);
+  }
+}
+
+const accounting = new AccountingDepartment("id2", []);
+
+accounting.addReport("something went wrong");
+accounting.printReports();
