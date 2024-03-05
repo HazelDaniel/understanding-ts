@@ -85,8 +85,15 @@ class ITDepartment extends Department {
 }
 
 class AccountingDepartment extends Department {
-  constructor(protected id: string, private reports: string[]) {
+  private static instance: AccountingDepartment;
+
+  private constructor(protected id: string, private reports: string[]) {
     super(id, "Accounting");
+  }
+
+  static getInstance(id: string, reports: string[]) {
+    if (this.instance) return this.instance;
+    return new AccountingDepartment(id, reports);
   }
 
   addEmployee(name: string) {
@@ -110,7 +117,9 @@ class AccountingDepartment extends Department {
   }
 }
 
-const accounting = new AccountingDepartment("id2", []);
+const accounting = AccountingDepartment.getInstance("id2", []);
+const accounting2 = AccountingDepartment.getInstance("id2", []);
+console.log(accounting, accounting2);
 
 accounting.addReport("something went wrong");
 accounting.printReports();
