@@ -49,9 +49,14 @@ printAddResult(1, 14);
 class Department {
   protected employees: string[] = [];
   constructor(private readonly id: string, public name: string) {}
+  static fiscalYear = 2020;
 
   describe(this: Department) {
     console.log(`Department (${this.id}): ${this.name}`);
+  }
+
+  static createEmployee(name: string) {
+    return { name };
   }
 
   addEmployee(employee: string) {
@@ -80,12 +85,12 @@ class AccountingDepartment extends Department {
     super(id, "Accounting");
   }
 
-	addEmployee(name: string) {
-		if (name === "Daniel") {
-			return;
-		}
-		this.employees.push(name);
-	}
+  addEmployee(name: string) {
+    if (name === "Daniel") {
+      return;
+    }
+    this.employees.push(name);
+  }
 
   addReport(text: string) {
     this.reports.push(text);
@@ -100,3 +105,7 @@ const accounting = new AccountingDepartment("id2", []);
 
 accounting.addReport("something went wrong");
 accounting.printReports();
+
+//static methods and properties
+const employee1 = Department.createEmployee("Hazel");
+console.log(employee1, Department.fiscalYear);
