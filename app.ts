@@ -46,14 +46,13 @@ console.log(userName);
 printAddResult(1, 14);
 
 // inheritance
-class Department {
+abstract class Department {
   protected employees: string[] = [];
-  constructor(private readonly id: string, public name: string) {}
+  constructor(protected readonly id: string, public name: string) {}
   static fiscalYear = 2020;
 
-  describe(this: Department) {
-    console.log(`Department (${this.id}): ${this.name}`);
-  }
+  // abstract method
+  abstract describe(this: Department): void;
 
   static createEmployee(name: string) {
     return { name };
@@ -75,13 +74,18 @@ class Department {
 // accounting.addEmployee("Emmanuel");
 
 class ITDepartment extends Department {
-  constructor(id: string, public admins: string[]) {
+  constructor(protected id: string, public admins: string[]) {
     super(id, "IT");
+  }
+
+  // abstract base class inheritance
+  describe(this: ITDepartment): void {
+    console.log(`IT department - ID: ${this.id}`);
   }
 }
 
 class AccountingDepartment extends Department {
-  constructor(id: string, private reports: string[]) {
+  constructor(protected id: string, private reports: string[]) {
     super(id, "Accounting");
   }
 
@@ -98,6 +102,11 @@ class AccountingDepartment extends Department {
 
   printReports() {
     console.log(this.reports);
+  }
+
+  // abstract base class inheritance
+  describe(this: AccountingDepartment): void {
+    console.log(`Accounting department - ID: ${this.id}`);
   }
 }
 
