@@ -128,7 +128,13 @@ accounting.printReports();
 const employee1 = Department.createEmployee("Hazel");
 console.log(employee1, Department.fiscalYear);
 
-type greeter = (salut: string) => void;
+// typing functions with interfaces
+interface greeter {
+  (salut: string): void;
+}
+
+// typing functions with custom types
+// type greeter = (salut: string) => void;
 
 // interface inheritance
 interface Named {
