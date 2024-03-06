@@ -127,3 +127,31 @@ accounting.printReports();
 //static methods and properties
 const employee1 = Department.createEmployee("Hazel");
 console.log(employee1, Department.fiscalYear);
+
+type greeter = (salut: string) => void;
+
+interface Person {
+  name: string;
+  about?: string;
+  readonly age: number;
+
+  greet: greeter;
+}
+
+
+class Professional implements Person {
+
+  constructor (public name: string, public about: string, public age: number, public job: string) { }
+
+  greet(salut: string) {
+    console.log(`${salut}!, my name is ${this.name} and ${this.about}. I work as a ${this.job}`);
+  }
+}
+
+let Hazel: Person;
+Hazel = new Professional("Hazel", "i am a 6 foot guy that loves making the world a better place", 4, "software engineer")
+Hazel.greet("Hi");
+
+const holla: (input: string)=> void = (input: string)=> {
+  return "input";
+}
