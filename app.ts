@@ -147,19 +147,20 @@ interface Greetable extends Named {
 interface Person extends Greetable {
   about?: string;
   readonly age: number;
+  notes?: ()=> string;
 }
 
 class Professional implements Person {
   constructor(
     public name: string,
-    public about: string,
     public age: number,
-    public job: string
+    public job: string,
+    public about?: string
   ) {}
 
   greet(salut: string) {
     console.log(
-      `${salut}!, my name is ${this.name} and ${this.about}. I work as a ${this.job}`
+      `${salut}!, my name is ${this.name} and ${this.about ? this.about : "passionate"}. I work as a ${this.job}`
     );
   }
 }
@@ -167,9 +168,9 @@ class Professional implements Person {
 let Hazel: Person;
 Hazel = new Professional(
   "Hazel",
-  "i am a 6 foot guy that loves making the world a better place",
   4,
-  "software engineer"
+  "software engineer",
+  "i am a 6 foot guy that loves making the world a better place",
 );
 Hazel.greet("Hi");
 
