@@ -147,7 +147,7 @@ interface Greetable extends Named {
 interface Person extends Greetable {
   about?: string;
   readonly age: number;
-  notes?: ()=> string;
+  notes?: () => string;
 }
 
 class Professional implements Person {
@@ -160,7 +160,9 @@ class Professional implements Person {
 
   greet(salut: string) {
     console.log(
-      `${salut}!, my name is ${this.name} and ${this.about ? this.about : "passionate"}. I work as a ${this.job}`
+      `${salut}!, my name is ${this.name} and ${
+        this.about ? this.about : "passionate"
+      }. I work as a ${this.job}`
     );
   }
 }
@@ -170,10 +172,45 @@ Hazel = new Professional(
   "Hazel",
   4,
   "software engineer",
-  "i am a 6 foot guy that loves making the world a better place",
+  "i am a 6 foot guy that loves making the world a better place"
 );
 Hazel.greet("Hi");
 
 const holla: (input: string) => void = (input: string) => {
   return "input";
 };
+
+interface Creature {
+  type: string;
+}
+
+interface Bird extends Creature {
+  type: "bird";
+  flyingSpeed: number;
+}
+
+interface Animal extends Creature {
+  //discriminated unions
+  type: "animal";
+  runningSpeed: number;
+}
+
+// union types
+type VaryingCreature = Animal | Bird;
+
+let varyingCreature: VaryingCreature = {
+  //discriminated unions
+  type: "animal",
+  runningSpeed: 2,
+};
+
+function setSpeed(creature: VaryingCreature) {
+  if (creature.type === "bird") {
+    creature.flyingSpeed = 120;
+  } else {
+    creature.runningSpeed = 80;
+  }
+}
+
+setSpeed(varyingCreature);
+console.log("varying creature");
