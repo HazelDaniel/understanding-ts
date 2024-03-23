@@ -213,4 +213,30 @@ function setSpeed(creature: VaryingCreature) {
 }
 
 setSpeed(varyingCreature);
-console.log(varyingCreature);
+// console.log(varyingCreature);
+
+function WithTemplate() {
+  return function <T extends { new (...args: any[]): { name: string } }>(
+    oldConstructor: T,
+    ..._: any[]
+  ) {
+    return class extends oldConstructor {
+      constructor(..._: any[]) {
+        super(_);
+        const h2Tag = document.createElement("h2");
+        h2Tag.innerHTML = this.name;
+        document.body.appendChild(h2Tag);
+      }
+    };
+  };
+}
+
+@WithTemplate()
+class PersonDec {
+  constructor(public name: string) {}
+}
+
+const personDec1 = new PersonDec("Hazel");
+const personDec2 = new PersonDec("Hazel@gmail.com");
+const personDec3 = new PersonDec("Daniel");
+const personDec4 = new PersonDec("olaleyedaniel2000@gmail.com");
