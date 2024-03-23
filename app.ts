@@ -231,9 +231,76 @@ function WithTemplate() {
   };
 }
 
+interface ValidatorConfig {
+  [propName: string]: {
+    [validatableProp: string]: string[];
+  };
+}
+
+interface Configurable {
+  ___validatorConfig?: ValidatorConfig;
+  name?: string;
+}
+
 @WithTemplate()
-class PersonDec {
+class PersonDec implements Configurable {
   constructor(public name: string) {}
+}
+
+function WithValidator(config: ValidatorConfig) {
+  return function <
+    T extends {
+      new (...args: any[]): Configurable;
+    }
+  >(oldConstructor: T, ..._: any[]) {
+    return class extends oldConstructor implements Configurable {
+      constructor(..._: any[]) {
+        super(_);
+        this.___validatorConfig = config;
+        console.log(this);
+      }
+    };
+  };
+}
+
+interface ConfigurableInterface extends Configurable {
+  new (...args: any[]): Configurable;
+}
+
+function positiveValidate<T extends ConfigurableInterface>(
+  target: T,
+  propName: string | symbol | number
+) {
+  if (!target.___validatorConfig) target.___validatorConfig = {};
+  if ((target as Configurable).___validatorConfig) {
+    target.___validatorConfig[target.constructor.name] = {
+      [propName]: ["positive"],
+    };
+  }
+}
+
+function requiredValidate<T extends ConfigurableInterface>(
+  target: T,
+  propName: string | symbol | number
+) {
+  if (!target.___validatorConfig) target.___validatorConfig = {};
+  if ((target as Configurable).___validatorConfig) {
+    target.___validatorConfig[target.constructor.name] = {
+      [propName]: ["required"],
+    };
+  }
+}
+
+@WithValidator({})
+class Course implements Configurable {
+  // @requiredValidate
+  name: string;
+  // @positiveValidate
+  title: string;
+  constructor(name: string, title: string) {
+    this.name = name;
+    this.title = title;
+  }
 }
 
 const personDec1 = new PersonDec("Hazel");
