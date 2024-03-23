@@ -213,4 +213,4 @@ function setSpeed(creature: VaryingCreature) {
 }
 
 setSpeed(varyingCreature);
-console.log("varying creature");
+console.log(varyingCreature);
