@@ -256,7 +256,7 @@ function WithValidator(config: ValidatorConfig) {
     return class extends oldConstructor implements Configurable {
       constructor(..._: any[]) {
         super(_);
-        this.___validatorConfig = config;
+        this.___validatorConfig = { ...this.___validatorConfig, ...config };
         console.log(this);
       }
     };
@@ -267,7 +267,7 @@ interface ConfigurableInterface extends Configurable {
   new (...args: any[]): Configurable;
 }
 
-function positiveValidate<T extends ConfigurableInterface>(
+function positiveValidate<T extends Configurable>(
   target: T,
   propName: string | symbol | number
 ) {
@@ -279,21 +279,25 @@ function positiveValidate<T extends ConfigurableInterface>(
   }
 }
 
-function requiredValidate<T extends ConfigurableInterface>(
-  target: T,
-  propName: string | symbol | number
-) {
-  if (!target.___validatorConfig) target.___validatorConfig = {};
-  if ((target as Configurable).___validatorConfig) {
-    target.___validatorConfig[target.constructor.name] = {
-      [propName]: ["required"],
-    };
-  }
+function requiredValidate() {
+  return function <T extends Configurable>(target: T, propName: any) {
+    console.log("target is ", target);
+    if (!(target.___validatorConfig)) {
+      console.log("no validator config present");
+      target.___validatorConfig = {};
+    }
+    if (target.___validatorConfig) {
+      target.___validatorConfig[target.constructor.name] = {
+        [propName]: ["required"],
+      };
+    }
+    console.log("required validation reached", target);
+  };
 }
 
-@WithValidator({})
+// @WithValidator({})
 class Course implements Configurable {
-  // @requiredValidate
+  @requiredValidate()
   name: string;
   // @positiveValidate
   title: string;
@@ -307,3 +311,5 @@ const personDec1 = new PersonDec("Hazel");
 const personDec2 = new PersonDec("Hazel@gmail.com");
 const personDec3 = new PersonDec("Daniel");
 const personDec4 = new PersonDec("olaleyedaniel2000@gmail.com");
+
+const course1 = new Course("geography", "GEO 301");
