@@ -3,7 +3,7 @@
 namespace _Drawable {
   export class Triangle implements Shape {
     public draw() {
-      console.log("triangle is being drawn");
+      console.log("triangle is being drawn.");
     }
   }
 }

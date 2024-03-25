@@ -2,7 +2,7 @@
 namespace _Drawable {
   export class Circle implements Shape {
     public draw() {
-      console.log("circle is being drawn");
+      console.log("circle is being drawn.");
     }
   }
 }
